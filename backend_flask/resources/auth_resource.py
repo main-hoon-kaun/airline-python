@@ -19,7 +19,7 @@ def register():
 
     user = create_user(username, email, password, role)
     access_token = create_access_token(identity={'id': user.id, 'username': user.username, 'role': user.role})
-    return jsonify({'access_token': access_token, 'username': user.username, 'role': user.role, 'id': user.id}), 201
+    return jsonify({'token': access_token, 'username': user.username, 'role': user.role, 'id': user.id}), 201
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -32,7 +32,7 @@ def login():
         return jsonify({'message': 'Invalid credentials'}), 401
 
     access_token = create_access_token(identity={'id': user.id, 'username': user.username, 'role': user.role})
-    return jsonify({'access_token': access_token, 'username': user.username, 'role': user.role, 'id': user.id}), 200
+    return jsonify({'token': access_token, 'username': user.username, 'role': user.role, 'id': user.id}), 200
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
