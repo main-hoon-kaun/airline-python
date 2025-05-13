@@ -3,9 +3,9 @@ from database import db
 from resources.airplane  import airplane_bp
 from resources.airport_resource import airport_bp 
 from resources.auth_resource import auth_bp
-
+from resources.flight_resource import flight_bp
 from resources.wallet_resource import wallet_bp
-
+from resources.booking_resource import booking_bp
 
 
 import secrets
@@ -26,8 +26,10 @@ db.init_app(app)
 app.register_blueprint(airplane_bp, url_prefix="/api/airplanes")
 app.register_blueprint(airport_bp , url_prefix="/api/airports")
 app.register_blueprint(auth_bp) 
+app.register_blueprint(flight_bp, url_prefix="/api/flights")
 
 app.register_blueprint(wallet_bp, url_prefix="/api/wallets")
+app.register_blueprint(booking_bp, url_prefix="/api/bookings")
 
 
 @app.before_request

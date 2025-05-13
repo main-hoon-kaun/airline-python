@@ -1,7 +1,7 @@
 from models.user_model import User
 from database import db
-
-def create_user(username, email, password, role='CUSTOMER'):
+def create_user(username, email, password, role=2):
+    # Create user object with the assigned role value
     user = User(username=username, email=email, password=password, role=role)
     db.session.add(user)
     db.session.commit()
