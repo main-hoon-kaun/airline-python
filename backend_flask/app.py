@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from database import db
+from dotenv import load_dotenv
 from resources.airplane  import airplane_bp
 from resources.airport_resource import airport_bp 
 from resources.auth_resource import auth_bp
@@ -7,21 +8,22 @@ from resources.flight_resource import flight_bp
 from resources.wallet_resource import wallet_bp
 from resources.booking_resource import booking_bp
 
-
-import secrets
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-
+from datetime import timedelta
+import os
+load_dotenv()
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://system:oracle@localhost:1522/?service_name=xe'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = "jetsenseSecretKey12345678901234567890"
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config['JWT_HEADER_NAME']     = 'Authorization'
 app.config['JWT_HEADER_TYPE']     = 'Bearer'
 app.config['JWT_DECODE_ALGORITHMS'] = ['HS256']
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 app.url_map.strict_slashes = False
 
 CORS(app, allow_headers=["Content-Type", "Authorization"],

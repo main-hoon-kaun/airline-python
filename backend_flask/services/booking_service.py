@@ -10,6 +10,9 @@ from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
 from dateutil import parser  
+import re
+from flask import jsonify, request
+
 def create_booking(data):
     try:
         # Fetch user by ID
@@ -55,7 +58,7 @@ def create_booking(data):
         db.session.commit()
  
         booking_logger.info(f"Booking created for user ID {data['user_id']}")
-        return to_booking_response_dto(booking)
+        return booking
  
     except Exception as e:
         db.session.rollback()
@@ -156,3 +159,14 @@ def get_all_bookings(user_email, role):
     except Exception as e:
         booking_logger.error(f"Error fetching bookings: {e}")
         raise
+    
+def camel_to_snake(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+def normalize_keys(obj):
+    if isinstance(obj, dict):
+        return {camel_to_snake(k): normalize_keys(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [normalize_keys(i) for i in obj]
+    return obj

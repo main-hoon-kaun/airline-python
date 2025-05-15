@@ -32,7 +32,8 @@ def register():
 
     access_token = create_access_token(identity=str(user.id), additional_claims={
     'username': user.username,
-    'role': user.role
+    'role': user.role,
+    'email': user.email
 })
 
 
@@ -40,7 +41,8 @@ def register():
         'token': access_token,
         'id': user.id,
         'username': user.username,
-        'role': user.role
+        'role': user.role,
+        'email': user.email
     }), 201
 
 
@@ -58,7 +60,8 @@ def login():
         identity=str(user.id),
         additional_claims={
             'username': user.username,
-            'role': user.role
+            'role': user.role,
+            'email': user.email
         }
     )
 
@@ -66,7 +69,8 @@ def login():
         'token': access_token,
         'id': user.id,
         'username': user.username,
-        'role': user.role
+        'role': user.role,
+        'email': user.email
     }), 200
 
 
@@ -79,5 +83,6 @@ def me():
     return jsonify({
         'id': identity,
         'username': claims.get('username'),
-        'role': claims.get('role')
+        'role': claims.get('role'),
+        'email': claims.get('email')
     })

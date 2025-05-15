@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.booking_service import *
 from logger import booking_logger
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from sqlalchemy.exc import IntegrityError
 booking_bp = Blueprint('booking', __name__)
  
@@ -23,6 +23,7 @@ def create_booking_route():
         current_user_id = current_user.get("id") if isinstance(current_user, dict) else int(current_user)
 
         data = request.get_json(force=True)
+        data = normalize_keys(data)
         booking_logger.info(f"Incoming booking payload: {data}")
 
         if not data or not isinstance(data, dict):
@@ -67,11 +68,13 @@ def update(id):
         booking_logger.error(f"Update error: {e}")
         return jsonify({'error': str(e)}), 400
  
-@booking_bp.route('/<int:id>/cancel/', methods=['PUT'])
+@booking_bp.route('/<int:id>/', methods=['DELETE'])
 @jwt_required()
 def cancel(id):
+    current_user = get_jwt()
+    user_email = current_user.get("email")
     try:
-        user_email = request.get_json()['user_email']
+        # user_email = request.get_json()['user_email']
         cancel_booking(id, user_email)
         return '', 204
     except Exception as e:
@@ -81,8 +84,12 @@ def cancel(id):
 @booking_bp.route('/<int:id>/', methods=['GET'])
 @jwt_required()
 def retrieve(id):
+    current_user = get_jwt()
+    user_email = current_user.get("email")
+    # role = current_user.get("role")
     try:
-        user_email = request.args.get('user_email')
+        # user_email = request.args.get('user_email')
+        # booking_logger.info(f"Retrieving booking for user email: {user_email}")
         result = get_booking_by_id(id, user_email)
         return jsonify(result)
     except Exception as e:
@@ -93,9 +100,12 @@ def retrieve(id):
 @jwt_required()
 
 def list_all():
+    current_user = get_jwt()
+    user_email = current_user.get("email")
+    role = current_user.get("role")
     try:
-        user_email = request.args.get('user_email')
-        role = request.args.get('role')
+        # user_email = request.args.get('user_email')
+        # role = request.args.get('role')
         result = get_all_bookings(user_email, role)
         return jsonify(result)
     except Exception as e:
