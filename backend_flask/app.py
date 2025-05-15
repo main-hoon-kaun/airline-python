@@ -1,4 +1,4 @@
-from flask import Flask,request
+from flask import Flask, request, jsonify
 from database import db
 from resources.airplane  import airplane_bp
 from resources.airport_resource import airport_bp 
@@ -15,19 +15,25 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:8080"}})
-app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://system:12345@localhost:1521/?service_name=xe'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://system:oracle@localhost:1522/?service_name=xe'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)
+app.config['JWT_SECRET_KEY'] = "jetsenseSecretKey12345678901234567890"
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
+app.config['JWT_HEADER_NAME']     = 'Authorization'
+app.config['JWT_HEADER_TYPE']     = 'Bearer'
+app.config['JWT_DECODE_ALGORITHMS'] = ['HS256']
 app.url_map.strict_slashes = False
+
+CORS(app, allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["Authorization"],  supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:8080"}})
+
 jwt = JWTManager(app)
 db.init_app(app)
-# Register your modules blueprints here
+
 app.register_blueprint(airplane_bp, url_prefix="/api/airplanes")
 app.register_blueprint(airport_bp , url_prefix="/api/airports")
 app.register_blueprint(auth_bp) 
 app.register_blueprint(flight_bp, url_prefix="/api/flights")
-
 app.register_blueprint(wallet_bp, url_prefix="/api/wallets")
 app.register_blueprint(booking_bp, url_prefix="/api/bookings")
 
@@ -35,6 +41,18 @@ app.register_blueprint(booking_bp, url_prefix="/api/bookings")
 @app.before_request
 def log_headers():
     print("Incoming request headers:", request.headers)
+
+@jwt.unauthorized_loader
+def handle_missing_token(error):
+    return jsonify({'jwt_error': 'Missing token', 'message': error}), 401
+
+@jwt.invalid_token_loader
+def handle_invalid_token(error):
+    return jsonify({'jwt_error': 'Invalid token', 'message': error}), 422
+
+@jwt.expired_token_loader
+def handle_expired_token(jwt_header, jwt_payload):
+    return jsonify({'jwt_error': 'Expired token'}), 401
 
 if __name__ == '__main__':
     with app.app_context():

@@ -3,10 +3,12 @@ from flask import Blueprint, request, jsonify
 from services.airplane_service import *
 from sqlalchemy.exc import IntegrityError
 from logger import airplane_logger # Import logger
+from flask_jwt_extended import jwt_required
 
 airplane_bp = Blueprint('airplane', __name__)
 
 @airplane_bp.route('/', methods=['POST'])
+@jwt_required()
 def create():
     try:
         data = request.get_json()
@@ -20,6 +22,7 @@ def create():
         return jsonify({'error': 'Internal server error'}), 500
 
 @airplane_bp.route('/', methods=['GET'])
+@jwt_required()
 def list_all():
     try:
         airplanes = get_all_airplanes()
@@ -29,6 +32,7 @@ def list_all():
         return jsonify({'error': 'Internal server error'}), 500
 
 @airplane_bp.route('/<int:id>/', methods=['GET'])
+@jwt_required()
 def retrieve(id):
     try:
         airplane = get_airplane_by_id(id)
@@ -41,6 +45,7 @@ def retrieve(id):
         return jsonify({'error': 'Internal server error'}), 500
 
 @airplane_bp.route('/<int:id>/', methods=['PUT'])
+# @jwt_required()
 def update(id):
     try:
         data = request.get_json()
@@ -54,6 +59,7 @@ def update(id):
         return jsonify({'error': 'Internal server error'}), 500
 
 @airplane_bp.route('/<int:id>/', methods=['DELETE'])
+# @jwt_required()
 def delete(id):
     try:
         delete_airplane(id)

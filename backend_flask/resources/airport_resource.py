@@ -2,10 +2,12 @@ from flask import Blueprint, request, jsonify
 from services.airport_service import *
 from sqlalchemy.exc import IntegrityError
 from logger import airport_logger  # Import logger
+from flask_jwt_extended import jwt_required
 
 airport_bp = Blueprint('airport', __name__)
 
 @airport_bp.route('/', methods=['POST'])
+@jwt_required()
 def create():
     try:
         data = request.get_json()
@@ -24,6 +26,7 @@ def create():
         return jsonify({'error': str(e)}), 400
 
 @airport_bp.route('/', methods=['GET'])
+@jwt_required()
 def list_all():
     airport_logger.info("Listing all airports")
     airports = get_all_airports()
@@ -36,6 +39,7 @@ def list_all():
     } for a in airports])
 
 @airport_bp.route('/<int:id>/', methods=['GET'])
+@jwt_required()
 def retrieve(id):
     try:
         airport_logger.info(f"Retrieving airport with ID: {id}")
@@ -52,6 +56,7 @@ def retrieve(id):
         return jsonify({'error': str(e)}), 404
 
 @airport_bp.route('/<int:id>/', methods=['PUT'])
+@jwt_required()
 def update(id):
     try:
         data = request.get_json()
@@ -69,6 +74,7 @@ def update(id):
         return jsonify({'error': str(e)}), 404
 
 @airport_bp.route('/<int:id>/', methods=['DELETE'])
+@jwt_required()
 def delete(id):
     try:
         airport_logger.info(f"Deleting airport with ID: {id}")

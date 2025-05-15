@@ -9,6 +9,8 @@ class User(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.String(256), nullable=False)  # Increase size to 256 characters
     role = db.Column(db.String(20), default='CUSTOMER')
+    # wallet = db.relationship('Wallet', uselist=False, back_populates='user')
+    # bookings = db.relationship('Booking', back_populates='user')
 
     @staticmethod
     def get_next_id():

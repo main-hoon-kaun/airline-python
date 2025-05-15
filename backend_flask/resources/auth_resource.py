@@ -1,5 +1,8 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import (
+    create_access_token, jwt_required,
+    get_jwt_identity, get_jwt
+)
 from services.user_service import create_user, authenticate_user
 from models.user_model import User
 from database import db
@@ -18,8 +21,28 @@ def register():
         return jsonify({'message': 'User already exists'}), 400
 
     user = create_user(username, email, password, role)
-    access_token = create_access_token(identity={'id': user.id, 'username': user.username, 'role': user.role})
-    return jsonify({'token': access_token, 'username': user.username, 'role': user.role, 'id': user.id}), 201
+
+    # access_token = create_access_token(
+    #     identity=str(user.id),
+    #     additional_claims={
+    #         'username': user.username,
+    #         'role': user.role
+    #     }
+    # )
+
+    access_token = create_access_token(identity=str(user.id), additional_claims={
+    'username': user.username,
+    'role': user.role
+})
+
+
+    return jsonify({
+        'token': access_token,
+        'id': user.id,
+        'username': user.username,
+        'role': user.role
+    }), 201
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -31,11 +54,30 @@ def login():
     if not user:
         return jsonify({'message': 'Invalid credentials'}), 401
 
-    access_token = create_access_token(identity={'id': user.id, 'username': user.username, 'role': user.role})
-    return jsonify({'token': access_token, 'username': user.username, 'role': user.role, 'id': user.id}), 200
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={
+            'username': user.username,
+            'role': user.role
+        }
+    )
+
+    return jsonify({
+        'token': access_token,
+        'id': user.id,
+        'username': user.username,
+        'role': user.role
+    }), 200
+
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def me():
-    identity = get_jwt_identity()
-    return jsonify(identity)
+    identity = get_jwt_identity()  # This is user ID as string
+    claims = get_jwt()             # Additional data: username, role
+
+    return jsonify({
+        'id': identity,
+        'username': claims.get('username'),
+        'role': claims.get('role')
+    })

@@ -1,4 +1,7 @@
-Flask==2.2.3
-Flask-SQLAlchemy==2.5.1
-Flask-Cors==3.1.1
-cx_Oracle
+flask
+flask_SQLAlchemy
+flask_Cors
+oracledb
+flask_jwt_extended
+python-dateutil
+python-dotenv

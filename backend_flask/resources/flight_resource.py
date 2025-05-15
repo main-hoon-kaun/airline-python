@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.flight_service import create_flight, get_all_flights, get_flight_by_id, update_flight, delete_flight
 from logger import flight_logger
 from datetime import datetime
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 flight_bp = Blueprint('flight', __name__)
 
@@ -34,7 +35,9 @@ def validate_string_field(field_value, field_name):
         raise ValueError(f"Invalid {field_name}: must be a non-empty string.")
     return field_value.strip()
 
+
 @flight_bp.route('/', methods=['POST'])
+@jwt_required()
 def create():
     try:
         flight_logger.info("Received request to create flight")
@@ -70,7 +73,9 @@ def create():
         flight_logger.error(traceback.format_exc())
         return jsonify({'error': 'Unexpected error occurred while creating the flight'}), 500
 
+
 @flight_bp.route('/', methods=['GET'])
+@jwt_required()
 def list_all():
     try:
         flight_logger.info("Listing all flights")
@@ -80,7 +85,9 @@ def list_all():
         flight_logger.error(f"Error listing flights: {str(e)}")
         return jsonify({'error': 'Could not list flights'}), 500
 
+
 @flight_bp.route('/<int:id>/', methods=['GET'])
+@jwt_required()
 def retrieve(id):
     try:
         flight_logger.info(f"Retrieving flight with ID: {id}")
@@ -92,7 +99,10 @@ def retrieve(id):
     except Exception as e:
         flight_logger.error(f"Unexpected error: {str(e)}")
         return jsonify({'error': 'Unexpected error occurred while retrieving the flight'}), 500
+
+
 @flight_bp.route('/<int:id>/', methods=['PUT'])
+@jwt_required()
 def update(id):
     try:
         data = request.get_json()
@@ -148,7 +158,10 @@ def update(id):
     except Exception as e:
         flight_logger.error(f"Unexpected error: {str(e)}")
         return jsonify({'error': 'Unexpected error occurred while updating the flight'}), 500
+
+
 @flight_bp.route('/<int:id>/', methods=['DELETE'])
+@jwt_required()
 def delete(id):
     try:
         flight_logger.info(f"Deleting flight with ID: {id}")
